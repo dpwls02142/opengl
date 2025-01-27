@@ -1,5 +1,4 @@
-#include "common.h"
-#include "shader.h"
+#include "context.h"
 #include <spdlog/spdlog.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -68,10 +67,13 @@ int main(int argc, const char** argv){
     auto glVersion = glGetString(GL_VERSION);
     SPDLOG_INFO("OpenGL context version: {}", reinterpret_cast<const char*>(glVersion)); // 드라이브 버전 출력
 
-    auto vertexShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
-    auto fragmentShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
-    SPDLOG_INFO("vertex shader id: {}", vertexShader->Get());
-    SPDLOG_INFO("fragment shader id: {}", fragmentShader->Get());
+    // context 초기화
+    auto context = Context::Create();
+    if (!context) {
+        SPDLOG_ERROR("failed to create context");
+        glfwTerminate();
+        return -1;
+    }
 
     // window 생성 직후에는 OnFramebufferSizeChange가 호출되지 않기때문에 첫 호출은 수동으로 생성
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -85,11 +87,8 @@ int main(int argc, const char** argv){
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        // state-setting
-        glClearColor(1.0f, 0.6f, 0.8f, 1.0f); // window 배경색을 뭘로 clear 할 지
-        
-        // state-using -> 앞서 설정한 state를 이용
-        glClear(GL_COLOR_BUFFER_BIT); 
+        // context의 Render 함수를 호출해서 window 배경색 그리기.
+        context->Render();
 
         // swap 호출
         // frame buffer swap -> 화면에 그림을 그리는 과정
@@ -98,6 +97,8 @@ int main(int argc, const char** argv){
         // => 그림이 그려지는 과정이 window에서 안 보이도록 
         glfwSwapBuffers(window);
     }
+    // 프로그램이 종료되면 메모리가 해제되도록
+    context.reset(); // == context= nullPtr;
 
     glfwTerminate();    
 

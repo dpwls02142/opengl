@@ -19,6 +19,8 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/common.cpp src/common.h
     src/shader.cpp src/shader.h
+    src/program.cpp src/program.h
+    src/context.cpp src/context.h
 )
 
 # 라이브러리 관련 파일은 Dependency.cmake로 따로 관리하여 include.
