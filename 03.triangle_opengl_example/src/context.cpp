@@ -10,21 +10,24 @@ ContextUPtr Context::Create() {
 bool Context::Init() {
 
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f, // top right
+        0.5f, -0.5f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f, 0.5f, 0.0f, // top left
+    };
+    uint32_t indices[] = { // note that we start from 0!
+        0, 1, 3, // first triangle
+        1, 2, 3, // second triangle
     };
 
     // vertex array object를 생성한 후에
-    glGenVertexArrays(1, &m_vertexArrayObject);
-    glBindVertexArray(m_vertexArrayObject);
+    m_vertexLayout = VertexLayout::Create();
     // vertex buffer object를 만듦
-    glGenBuffers(1, &m_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9, vertices, GL_STATIC_DRAW);
+    m_vertexBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices, sizeof(float) * 12);
     // 그 담에 vertex attributes를 설정
-    glEnableVertexAttribArray(0); // shader/simple.vs의 location과 연결
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+    m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	// index buffer 생성
+    m_indexBuffer = Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(uint32_t) * 6);
 
     // shader load
     // 기존엔 auto로 선언했기에 shader의 unique pointer 값 (==스마트 포인터)이 들어갔었는데,
@@ -51,8 +54,9 @@ bool Context::Init() {
 
 void Context::Render() {
     glClear(GL_COLOR_BUFFER_BIT);
-    glUseProgram(m_program->Get());
+    m_program->Use();
     glPointSize(10.0f); 
     // primitive: 그리고자하는 타입, offset: 첫 정점 idx, count: 정점 개수
-    glDrawArrays(GL_LINE_STRIP, 0, 3); // draw array
+    // glDrawArrays(GL_TRIANGLES, 0, 6); // draw array
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
