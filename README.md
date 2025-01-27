@@ -6,3 +6,4 @@
 |------|
 |[01. setting](https://github.com/dpwls02142/opengl/tree/main/01.opengl_setting)|
 |[02. first project](https://github.com/dpwls02142/opengl/tree/main/02.first_opengl_example)|
+|[03. Drawing triangles and rectangles](https://github.com/dpwls02142/opengl/tree/main/03.triangle_opengl_example)|
